@@ -10,11 +10,23 @@
     ViewData["Title"] = "Products";
 }
 
+@{
+    var message = TempData["Message"];
+}
+
 <h1>Product List</h1>
 
-<table class="table mt-6">
+@if (message is not null)
+{
+    <p style="background-color: #ffcccc; color: #000; padding: 10px; border-radius: 5px;">
+        @message
+    </p>
+}
+
+
+<table class="table mt-3 table-striped">
     <thead>
-        <tr>
+        <tr class="alert-dark">
             <th>Product Id</th>
             <th>Name</th>
             <th>Category</th>
@@ -22,12 +34,13 @@
             <th>Quantity</th>
             <th>SKU</th>
             <th>Description</th>
+            <th colspan="2">Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var product in Model)
         {
-            <tr>
+            <tr class="table-striped">
                 <td>@product.ProductId</td>
                 <td>@product.Name</td>
                 <td>@product.Category</td>
@@ -35,6 +48,15 @@
                 <td>@product.Quantity</td>
                 <td>@product.SKU</td>
                 <td>@product.Description</td>
+                @if (product.Image is not null)
+                {
+                    <td><img src="data:image/jpeg;base64,@(Convert.ToBase64String(product.Image))" alt="Image" width="auto" height="80" /></td>
+                }
+                else
+                {
+                    <td></td>
+                }
+
                 <td><a class="btn btn-primary" asp-area="" asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id">Edit</a></td>
                 <td><a class="btn btn-secondary" asp-area="" asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id">Delete</a></td>
             </tr>
@@ -43,6 +65,6 @@
 </table>
 
 
-<div class="mt-6">
+<div class="mt-3">
     <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Add"><button class="float-end btn btn-primary">Add New Product</button></a>
 </div>

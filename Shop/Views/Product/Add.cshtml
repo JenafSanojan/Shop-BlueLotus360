@@ -11,9 +11,20 @@
     ViewData["Title"] = "Add Product";
 }
 
+@{
+    var message = TempData["Message"];
+}
+
 <h1>Add New Product</h1>
 
-<form action="Added" method="post">
+@if(message is not null)
+{
+    <p style="background-color: #ffcccc; color: #000; padding: 10px; border-radius: 5px;">
+        @message
+    </p>
+}
+
+<form enctype="multipart/form-data" method="post">
     <div class="form-group mt-3">
         <label asp-for="Id">Product Id:</label>
         <input asp-for="Id" class="form-control" required/>
@@ -22,7 +33,7 @@
     
     <div class="form-group mt-3">
         <label asp-for="Name">Name:</label>
-        <input asp-for="Name" class="form-control" required />
+        <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
@@ -46,7 +57,7 @@
 
     <div class="form-group mt-3">
         <label asp-for="SKU">Stock Keeping Unit:</label>
-        <input asp-for="SKU" class="form-control" />
+        <input asp-for="SKU" class="form-control" required />
         <span asp-validation-for="SKU" class="text-danger"></span>
     </div>
 
@@ -54,6 +65,12 @@
         <label asp-for="Description">Description:</label>
         <textarea asp-for="Description" class="form-control"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-3">
+        <label asp-for="Image">Image:</label>
+        <input name="Image" type="file" asp-for="Image" class="form-control-file" accept="image/*" />
+        <span asp-validation-for="Image" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary mt-3">Add Product</button>

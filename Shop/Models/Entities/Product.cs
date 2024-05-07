@@ -7,7 +7,7 @@ namespace Shop.Models.Entities
 
         public int Id { get; set; } // auto number
 
-        [Required(ErrorMessage = "iD is required")] // Applies required attribute to the name property
+        [Required(ErrorMessage = "ID is required")] // Applies required attribute to the name property
         public long ProductId { get; set; } // Product ID (Normally bar code reads to int)
 
         [Required(ErrorMessage = "Name is required")] // Applies required attribute to the name property
@@ -29,6 +29,9 @@ namespace Shop.Models.Entities
         [StringLength(50)]
         public string SKU { get; set; } // Stock keeping unit
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
+
+        // Nullable byte array or string for the image
+        public byte[]? Image { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Shop.Data;
 using Shop.Models;
 using Shop.Models.Entities;
@@ -17,9 +19,21 @@ namespace Shop.Controllers
         [HttpGet]
         public async Task<IActionResult> Index() // Read
         {
-            var products = await dbContext.Products.ToListAsync();
+            try {
+                var products = await dbContext.Products.ToListAsync();
+                return View(products);
+            } catch (Exception ex)
+            {
+                // Take first 5 lines of error and log (for clarity)
+                var exceptionMessageLines = ex.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var exceptionSummary = string.Join(Environment.NewLine, exceptionMessageLines.Take(5));
 
-            return View(products);
+                Log.Error("Error in Product/Index:\n" + exceptionSummary + "\n\n", "An error occurred in Product/Index.");
+
+                TempData["Message"] = ex.Message;
+                return View();
+            }
+
         }
 
         [HttpGet]
@@ -29,23 +43,52 @@ namespace Shop.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Added(AddProductViewModel viewModel)
+        public async Task<IActionResult> Add(AddProductViewModel viewModel)
         {
-            var product = new Product
+            try
             {
-                ProductId = viewModel.Id,
-                Name = viewModel.Name,
-                SKU = viewModel.SKU,
-                Quantity = viewModel.Quantity,
-                Category = viewModel.Category,
-                Description = viewModel.Description,
-                Price = viewModel.Price,
-            };
+                byte[]? imageData = null;
 
-            await dbContext.Products.AddAsync(product);
+                using (var memoryStream = new MemoryStream())
+                {
+                    if (viewModel.Image is not null) {
+                        await viewModel.Image.CopyToAsync(memoryStream);
+                        imageData = memoryStream.ToArray();
+                    }
+                }
 
-            await dbContext.SaveChangesAsync();
+                var product = new Product
+                {
+                    ProductId = viewModel.Id,
+                    Name = viewModel.Name,
+                    SKU = viewModel.SKU,
+                    Quantity = viewModel.Quantity,
+                    Category = viewModel.Category,
+                    Description = viewModel.Description,
+                    Price = viewModel.Price,
+                    Image = imageData,
+                };
 
+                await dbContext.Products.AddAsync(product);
+
+                await dbContext.SaveChangesAsync();
+
+                return RedirectToAction("Added");
+            } catch (Exception ex)
+            {                // Take first 5 lines of error and log (for clarity)
+                var exceptionMessageLines = ex.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var exceptionSummary = string.Join(Environment.NewLine, exceptionMessageLines.Take(5));
+
+                Log.Error("Error in Product/Add:\n" + exceptionSummary + "\n\n", "An error occurred in Product/Add.");
+
+                TempData["Message"] = ex.Message.ToString();
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Added()
+        {
             return View();
         }
 
@@ -58,28 +101,59 @@ namespace Shop.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edited(Product product) 
+        public async Task<IActionResult> Edit(Product product)
         {
-            var existingProduct = await dbContext.Products.FindAsync(product.Id);
+            try {
+                var existingProduct = await dbContext.Products.FindAsync(product.Id);
 
-            if (existingProduct is not null)
-            {
-                existingProduct.ProductId = product.ProductId;
-                existingProduct.Name = product.Name;
-                existingProduct.SKU = product.SKU;
-                existingProduct.Quantity = product.Quantity;
-                existingProduct.Category = product.Category;
-                existingProduct.Description = product.Description;  
-                existingProduct.Price = product.Price;
+                byte[]? imageData = null;
 
-                await dbContext.SaveChangesAsync();
+                using (var memoryStream = new MemoryStream())
+                {
+                    if (viewModel.Image is not null)
+                    {
+                        await viewModel.Image.CopyToAsync(memoryStream);
+                        imageData = memoryStream.ToArray();
+                    }
+                }
 
-                return View();
+
+                if (existingProduct is not null)
+                {
+                    existingProduct.ProductId = product.ProductId;
+                    existingProduct.Name = product.Name;
+                    existingProduct.SKU = product.SKU;
+                    existingProduct.Quantity = product.Quantity;
+                    existingProduct.Category = product.Category;
+                    existingProduct.Description = product.Description;
+                    existingProduct.Price = product.Price;
+                    existingProduct.Image = product.Image;
+
+                    await dbContext.SaveChangesAsync();
+
+                    return RedirectToAction("Edited");
+                }
+                else
+                {
+                    return View("Error");
+                }
+            } catch (Exception ex)
+            {                
+                // Take first 5 lines of error and log (for clarity)
+                var exceptionMessageLines = ex.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var exceptionSummary = string.Join(Environment.NewLine, exceptionMessageLines.Take(5));
+
+                Log.Error("Error in Product/Edit:\n" + exceptionSummary + "\n\n", "An error occurred in Product/Edit.");
+
+                TempData["Message"] = ex.Message.ToString();
             }
-            else
-            {
-                return View("Error");
-            }
+            return View(product);
+        }
+
+        [HttpGet]
+        public IActionResult Edited()
+        {
+            return View();
         }
 
         [HttpPost]
@@ -100,14 +174,25 @@ namespace Shop.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int Id)
         {
-            var existingProduct = await dbContext.Products
+            try {
+                var existingProduct = await dbContext.Products
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == Id);
 
-            if (existingProduct is not null)
+                if (existingProduct is not null)
+                {
+                    dbContext.Products.Remove(existingProduct);
+                    await dbContext.SaveChangesAsync();
+                }
+            } catch (Exception ex)
             {
-                dbContext.Products.Remove(existingProduct);
-                await dbContext.SaveChangesAsync();
+                // Take first 5 lines of error and log (for clarity)
+                var exceptionMessageLines = ex.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var exceptionSummary = string.Join(Environment.NewLine, exceptionMessageLines.Take(5));
+
+                Log.Error("Error in Product/Delete:\n" + exceptionSummary + "\n\n", "An error occurred in Product/Delete.");
+
+                TempData["Message"] = ex.Message.ToString();
             }
             return RedirectToAction("Index");
         }
