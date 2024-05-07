@@ -106,18 +106,6 @@ namespace Shop.Controllers
             try {
                 var existingProduct = await dbContext.Products.FindAsync(product.Id);
 
-                byte[]? imageData = null;
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    if (viewModel.Image is not null)
-                    {
-                        await viewModel.Image.CopyToAsync(memoryStream);
-                        imageData = memoryStream.ToArray();
-                    }
-                }
-
-
                 if (existingProduct is not null)
                 {
                     existingProduct.ProductId = product.ProductId;
