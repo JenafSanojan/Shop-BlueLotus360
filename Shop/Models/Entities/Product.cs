@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shop.Models.Entities
 {
@@ -33,5 +34,8 @@ namespace Shop.Models.Entities
 
         // Nullable byte array or string for the image
         public byte[]? Image { get; set; }
+
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; }
     }
 }

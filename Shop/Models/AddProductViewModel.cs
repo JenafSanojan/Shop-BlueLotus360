@@ -28,7 +28,6 @@ namespace Shop.Models
 
         public string? Description { get; set; }
 
-        // Nullable byte array or string for the image
         public IFormFile? Image { get; set; }
     }
 }

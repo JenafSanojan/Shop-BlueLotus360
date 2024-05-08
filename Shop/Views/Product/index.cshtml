@@ -15,6 +15,7 @@
 }
 
 <h1>Product List</h1>
+<h6 class="mb-3">Click on the product id to view the products</h6>
 
 @if (message is not null)
 {
@@ -31,9 +32,9 @@
             <th>Name</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Quantity</th>
-            <th>SKU</th>
-            <th>Description</th>
+            <th>Stock Quantity</th>
+            <th>Stock Keeping Unit</th>
+            <th>Product Image</th>
             <th colspan="2">Actions</th>
         </tr>
     </thead>
@@ -41,13 +42,12 @@
         @foreach (var product in Model)
         {
             <tr class="table-striped">
-                <td>@product.ProductId</td>
+                <td><a class="" asp-area="" asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">@product.ProductId</a></td>
                 <td>@product.Name</td>
                 <td>@product.Category</td>
                 <td>@product.Price</td>
                 <td>@product.Quantity</td>
                 <td>@product.SKU</td>
-                <td>@product.Description</td>
                 @if (product.Image is not null)
                 {
                     <td><img src="data:image/jpeg;base64,@(Convert.ToBase64String(product.Image))" alt="Image" width="auto" height="80" /></td>

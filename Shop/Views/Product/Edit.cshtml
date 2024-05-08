@@ -78,11 +78,19 @@ else
             <textarea asp-for="Description" class="form-control"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
+
+        @if (Model.Image is not null)
+        {
+            <div class="form-group mt-3 mb-3">
+                <label>Image:</label>
+                <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Image))" alt="Image" width="auto" height="80" />
+            </div>
+        }
         
         <div class="form-group mt-3">
-            <label asp-for="Image">Image:</label>
-            <input type="file" asp-for="Image" class="form-control-file" accept="image/*" />
-            <span asp-validation-for="Image" class="text-danger"></span>
+            <label asp-for="ImageFile">Select New Image:</label>
+            <input name="ImageFile" type="file" asp-for="ImageFile" class="form-control-file" accept="image/*" />
+            <span asp-validation-for="ImageFile" class="text-danger"></span>
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Update Product</button>

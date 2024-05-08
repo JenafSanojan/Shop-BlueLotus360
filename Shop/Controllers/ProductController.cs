@@ -37,6 +37,18 @@ namespace Shop.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
+        }
+
+
+        [HttpGet]
         public IActionResult Add() // Write
         {
             return View();
@@ -106,6 +118,17 @@ namespace Shop.Controllers
             try {
                 var existingProduct = await dbContext.Products.FindAsync(product.Id);
 
+                byte[]? imageData = null;
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    if (product.ImageFile is not null)
+                    {
+                        await product.ImageFile.CopyToAsync(memoryStream);
+                        imageData = memoryStream.ToArray();
+                    }
+                }
+
                 if (existingProduct is not null)
                 {
                     existingProduct.ProductId = product.ProductId;
@@ -115,7 +138,7 @@ namespace Shop.Controllers
                     existingProduct.Category = product.Category;
                     existingProduct.Description = product.Description;
                     existingProduct.Price = product.Price;
-                    existingProduct.Image = product.Image;
+                    if (imageData is not null) { existingProduct.Image = imageData; }
 
                     await dbContext.SaveChangesAsync();
 
