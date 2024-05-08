@@ -30,7 +30,7 @@
 }
 else
 {
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <div class="form-group mt-3">
             <label asp-for="Id">Id:</label>
             <input asp-for="Id" class="form-control" readonly required />
@@ -86,9 +86,9 @@ else
                 <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Image))" alt="Image" width="auto" height="80" />
             </div>
         }
-        
+
         <div class="form-group mt-3">
-            <label asp-for="ImageFile">Select New Image:</label>
+            <label asp-for="ImageFile">Image:</label>
             <input name="ImageFile" type="file" asp-for="ImageFile" class="form-control-file" accept="image/*" />
             <span asp-validation-for="ImageFile" class="text-danger"></span>
         </div>

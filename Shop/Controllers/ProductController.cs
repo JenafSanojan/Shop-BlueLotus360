@@ -113,7 +113,7 @@ namespace Shop.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Product product)
+        public async Task<IActionResult> Edit(Product product, IFormFile imageFile)
         {
             try {
                 var existingProduct = await dbContext.Products.FindAsync(product.Id);
@@ -122,9 +122,9 @@ namespace Shop.Controllers
 
                 using (var memoryStream = new MemoryStream())
                 {
-                    if (product.ImageFile is not null)
+                    if (imageFile is not null)
                     {
-                        await product.ImageFile.CopyToAsync(memoryStream);
+                        await imageFile.CopyToAsync(memoryStream);
                         imageData = memoryStream.ToArray();
                     }
                 }
