@@ -81,19 +81,20 @@ else
 
         @if (Model.Image is not null)
         {
-            <div class="form-group mt-3 mb-3">
-                <label>Image:</label>
+            <div class="form-group mt-3 mb-3" id="ImageDiv">
+                <label>Image: &nbsp;&nbsp;</label>
                 <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Image))" alt="Image" width="auto" height="80" />
             </div>
         }
 
         <div class="form-group mt-3">
-            <label asp-for="ImageFile">Image:</label>
+            <label asp-for="ImageFile">Add New Image:</label>
             <input name="ImageFile" type="file" asp-for="ImageFile" class="form-control-file" accept="image/*" />
             <span asp-validation-for="ImageFile" class="text-danger"></span>
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Update Product</button>
         <button type="submit" class="btn btn-danger mt-3" asp-action="DeletePost" asp-controller="Product">Delete Product</button>
+        <a class="btn btn-secondary mt-3" asp-controller="Product" asp-action="Index">Cancel</a>
     </form>
 }

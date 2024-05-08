@@ -161,6 +161,7 @@ namespace Shop.Controllers
             return View(product);
         }
 
+
         [HttpGet]
         public IActionResult Edited()
         {
