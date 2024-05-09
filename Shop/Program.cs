@@ -11,7 +11,7 @@ builder.Services.AddControllersWithViews();
 // Configure Serilog to log errors to a file
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Error() // Log only errors and above
-    .WriteTo.File(@"C:\Logs\log.txt", rollingInterval: RollingInterval.Day) // Log to a file, roll everyday
+    .WriteTo.File(@"C:\Logs\log.txt", rollingInterval: RollingInterval.Day) // Log to a file, roll or create new everyday
     .CreateLogger();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

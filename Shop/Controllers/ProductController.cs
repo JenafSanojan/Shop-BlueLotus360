@@ -47,11 +47,15 @@ namespace Shop.Controllers
             return View(product);
         }
 
-
         [HttpGet]
         public IActionResult Add() // Write
         {
             return View();
+        }
+
+        private bool ProductExists(long id)
+        {
+            return dbContext.Products.Any(e => e.ProductId == id);
         }
 
         [HttpPost]
@@ -67,6 +71,12 @@ namespace Shop.Controllers
                         await viewModel.Image.CopyToAsync(memoryStream);
                         imageData = memoryStream.ToArray();
                     }
+                }
+
+                if(ProductExists(viewModel.Id))
+                {
+                    TempData["message"] = "A product with same \"Product Id: " + viewModel.Id + " \" already exists, please add a new id or edit the existing one";
+                    return View(viewModel);
                 }
 
                 var product = new Product
@@ -109,13 +119,18 @@ namespace Shop.Controllers
         {
             var product = await dbContext.Products.FindAsync(id);
 
-            return View(product);
+            if (product is not null) {
+                return View(product);
+            }
+
+            return NotFound();
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(Product product, IFormFile imageFile)
         {
             try {
+
                 var existingProduct = await dbContext.Products.FindAsync(product.Id);
 
                 byte[]? imageData = null;
@@ -131,21 +146,30 @@ namespace Shop.Controllers
 
                 if (existingProduct is not null)
                 {
-                    existingProduct.ProductId = product.ProductId;
-                    existingProduct.Name = product.Name;
-                    existingProduct.SKU = product.SKU;
-                    existingProduct.Quantity = product.Quantity;
-                    existingProduct.Category = product.Category;
-                    existingProduct.Description = product.Description;
-                    existingProduct.Price = product.Price;
-                    if (imageData is not null) { existingProduct.Image = imageData; }
+                    if (existingProduct.ProductId == product.ProductId || !ProductExists(product.ProductId) || product.ProductId == 0)
+                    {
+                        existingProduct.ProductId = product.ProductId != 0 ? product.ProductId : existingProduct.ProductId;
+                        existingProduct.Name = product.Name is not null ? product.Name : existingProduct.Name;
+                        existingProduct.SKU = product.SKU is not null ? product.SKU : existingProduct.SKU;
+                        existingProduct.Quantity = product.Quantity != 0 ? product.Quantity : existingProduct.Quantity;
+                        existingProduct.Category = product.Category is not null ? product.Category : existingProduct.Category;
+                        existingProduct.Description = product.Description is not null ? product.Description : existingProduct.Description;
+                        existingProduct.Price = product.Price != 0 ? product.Price : existingProduct.Price;
+                        if (imageData is not null) { existingProduct.Image = imageData; }
 
-                    await dbContext.SaveChangesAsync();
+                        await dbContext.SaveChangesAsync();
 
-                    return RedirectToAction("Edited");
+                        return RedirectToAction("Edited");
+                    }
+                    else
+                    {
+                        TempData["Message"] = "A product already exists with the same ProductId, Please choose a different product id.";
+                        return View(product);
+                    }
                 }
                 else
                 {
+                    TempData["Message"] = "Product does not exists, please add as a new one";
                     return View("Error");
                 }
             } catch (Exception ex)
@@ -157,8 +181,8 @@ namespace Shop.Controllers
                 Log.Error("Error in Product/Edit:\n" + exceptionSummary + "\n\n", "An error occurred in Product/Edit.");
 
                 TempData["Message"] = ex.Message.ToString();
+                return View(product);
             }
-            return View(product);
         }
 
 
@@ -208,6 +232,5 @@ namespace Shop.Controllers
             }
             return RedirectToAction("Index");
         }
-
     }
 }

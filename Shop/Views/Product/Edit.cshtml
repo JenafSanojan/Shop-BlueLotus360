@@ -12,13 +12,14 @@
 }
 
 @{
-    var message = TempData["Message"];
+    var message = TempData["message"];
 }
 
 <h1>Edit Product</h1>
 
 @if (message is not null)
 {
+    message = @Html.Raw(TempData["message"]);
     <p style="background-color: #ffcccc; color: #000; padding: 10px; border-radius: 5px;">
         @message
     </p>
